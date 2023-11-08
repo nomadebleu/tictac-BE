@@ -14,20 +14,16 @@ router.get('/mycart', function(req, res) {
     arrival: req.body.arrival,
     date: req.body.date
   }
-
   if (checkBody(body, ['departure', 'arrival', 'date'])) {
-    
-  
 
     Trip.find({
       departure: { $regex: new RegExp(body.departure, 'i') },
       arrival: { $regex: new RegExp(body.arrival, 'i') },
     })
       .then(data => {
-        const filteredTrips = data.filter(trip => {          
-          return new RegExp(body.date).test(trip.date.toISOString());
-        });
-
+        const filteredTrips = data.filter(trip => new RegExp(body.date).test(trip.date.toISOString()));
+        //On filtre en fonction du regex qui est mis au format
+        
         if (filteredTrips.length > 0) {
           res.json({ result: true, trip: filteredTrips });
         } else {
