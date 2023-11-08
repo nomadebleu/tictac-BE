@@ -6,9 +6,9 @@ const moment = require('moment-timezone');
 const {checkBody} = require('../modules/checkBody')
 
 
-/*GET/mycart---------------Récupération de la ville DEPARTURE/ARRIVAL en fonction de la DATE*/
+/*POST/mycart---------------Récupération de la ville DEPARTURE/ARRIVAL en fonction de la DATE*/
 
-router.get('/mycart', function(req, res) {
+router.post('/mycart', function(req, res) {
   const body = {
     departure: req.body.departure,
     arrival: req.body.arrival,
@@ -23,7 +23,7 @@ router.get('/mycart', function(req, res) {
       .then(data => {
         const filteredTrips = data.filter(trip => new RegExp(body.date).test(trip.date.toISOString()));
         //On filtre en fonction du regex qui est mis au format
-        
+
         if (filteredTrips.length > 0) {
           res.json({ result: true, trip: filteredTrips });
         } else {
