@@ -8,7 +8,7 @@ const moment = require('moment-timezone');
 const {checkBody} = require('../modules/checkBody')
 
 
-/*POST/mycart-Récupération de la ville DEPARTURE/ARRIVAL en fonction de la DATE*/
+/*POST/mycart - En lien avec la collection TRIPS pour avoir les trajets*/
 
 router.post('/mycart', function(req, res) {
   const body = {
@@ -37,51 +37,110 @@ router.post('/mycart', function(req, res) {
   }
 });
 
-/*POST/mycartBook----Récupération des mes trajets électionnés ds mycart*/
+/*POST/mycartBook - En lien avec la collection CARTS pour stocker les paniers.
+Attention dans le DOM au format de time récupéré, il faut qu'il soit au format suivant
+ sinon la route ne fonctionne pas:
+ {
+      "_id": "654ded4dacf24b3bf0c744b3",
+      "departure": "paris",
+      "arrival": "bruxelles",
+      "time": "2023-11-10T12:30:00.000Z", <----------------- comme ceci
+      "price": 50,
+      "__v": 0
+    }
+    */
 
 router.post('/mycartBook', function(req, res) {
   const body = {
     departure: req.body.departure,
     arrival: req.body.arrival,
-    date: req.body.date,
     time: req.body.time,
-    price: req.body.price
-  }
-  if (checkBody(body, ['departure', 'arrival', 'date','time','price'])) {
+    price: req.body.price,
+    idCart:req.body.idCart
+  };
 
-    Cart.find({})
-      .then(cartBooked => {
-        if (cartBooked.length > 0) {
-          res.json({ result: true, carts: cartBooked });
-        } else {
-          res.json({ result: false, message: 'No trips booked' });
-        }
-      });
+  if (checkBody(body, ['departure', 'arrival', 'time', 'price', 'idCart'])) {
+    const newCart = new Cart(body);
+
+    newCart.save().then(() => {
+      Cart.find({}).then(carts => {
+        res.json({ result: true, carts });
+      })
+    })
   } else {
-    res.json({ result: false, message: 'Pb' });
+    res.json({ result: false, error: 'Erreur au niveau du body' });
   }
+
 });
-/*GET/mycartBook--------pour afficher les données de la db cart et créer le html ds FE*/
+
+/*GET/mycartBook - En lien avec la collection CARTS pour afficher tous les CARTS*/
+
 router.get('/mycartBook', function(req, res) {
   Cart.find({})
-    .then(date => {
-      console.log(data)
+    .then(allCarts => {
+      res.json({result:true, allCarts})
     })
 })
 
+/*POST/mybookings - En lien avec la collection BOOKINGS pour stocker les paniers booking.
+Attention également pour la durée qui doit être aussis dans le même format que time*/
 
-/*DELETE/mycart---------------Supprime un TRAJET dans mycart*/
+router.post('/mybookings', function(req, res) {
+  const body = {
+    departure: req.body.departure,
+    arrival: req.body.arrival,
+    time: req.body.time,
+    price: req.body.price,
+    duree: req.body.duree
+  };
+    
+  if (checkBody(body, ['departure', 'arrival', 'time', 'price', 'duree'])) {
+    const newBookings = new Booking(body);
+    
+    newBookings.save().then(() => {
+      Booking.find({}).then(bookings => {
+        res.json({ result: true, bookings });
+        })
+    })
+  } else {
+        res.json({ result: false, error: 'Erreur au niveau du body' });
+  }
+    
+});
+    
+/*GET/mybookings - En lien avec la collection BOOKINGS pour afficher tous les BOOKINGS*/
+    
+router.get('/mybookings', function(req, res) {
+  Booking.find({})
+    .then(allBookings => {
+      res.json({result:true, allBookings})
+    })
+})
+    
+/*DELETE/mycartBook en lien avec la collection CARTS pour supprimer un trajet*/
 
-router.delete('/mycart', function(req,res) {
-    Trip.deleteOne()
-  res.json({});
+router.delete('/mycartBook/:idCart', function(req,res) {
+    Cart.deleteOne({idCart: req.params.idCart})
+      .then(deletedCart => {
+        if(deletedCart.deletedCount > 0){
+          Cart.find().then(data =>{
+            res.json({result:true, message:'Cart deleted'})
+          });
+        } else {
+            res.json({result:false, message: 'Pb DELETE' })
+        }
+      });
 });
 
-/*GET/mybooking---------------Récupération des réservations*/
+/*DELETE/mycartBook en lien avec la collection CARTS pour supprimer TOUS les trajets*/
 
-router.get('/mybooking', function(req,res) {
-
-  res.json({});
-});
+router.delete('/mycartBook', function(req,res) {
+  Cart.deleteMany()
+    .then(deletedCart => {
+        Cart.find().then(data =>{
+          res.json({result:true, message:'All is deleted'});
+        });
+      }); 
+    });
 
 module.exports = router;

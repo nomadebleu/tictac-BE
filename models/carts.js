@@ -4,7 +4,8 @@ const cartsSchema = mongoose.Schema({
     departure:String,
     arrival:String,
     time:Date,
-    price:Number
+    price:Number,
+    idCart:Number
 });
 
 const Cart = mongoose.model('carts',cartsSchema);
