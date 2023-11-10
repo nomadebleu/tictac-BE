@@ -5,7 +5,6 @@ const cartsSchema = mongoose.Schema({
     arrival:String,
     time:Date,
     price:Number,
-    idCart:Number
 });
 
 const Cart = mongoose.model('carts',cartsSchema);

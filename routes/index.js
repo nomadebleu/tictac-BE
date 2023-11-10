@@ -55,11 +55,10 @@ router.post('/mycartBook', function(req, res) {
     departure: req.body.departure,
     arrival: req.body.arrival,
     time: req.body.time,
-    price: req.body.price,
-    idCart:req.body.idCart
+    price: req.body.price
   };
 
-  if (checkBody(body, ['departure', 'arrival', 'time', 'price', 'idCart'])) {
+  if (checkBody(body, ['departure', 'arrival', 'time', 'price'])) {
     const newCart = new Cart(body);
 
     newCart.save().then(() => {
@@ -119,12 +118,12 @@ router.get('/mybookings', function(req, res) {
     
 /*DELETE/mycartBook en lien avec la collection CARTS pour supprimer un trajet*/
 
-router.delete('/mycartBook/:idCart', function(req,res) {
-    Cart.deleteOne({idCart: req.params.idCart})
+router.delete('/mycartBook/:index', function(req,res) {
+    Cart.deleteOne({carts: req.params.index})
       .then(deletedCart => {
         if(deletedCart.deletedCount > 0){
           Cart.find().then(data =>{
-            res.json({result:true, message:'Cart deleted'})
+            res.json({result:true, cart:data})
           });
         } else {
             res.json({result:false, message: 'Pb DELETE' })
