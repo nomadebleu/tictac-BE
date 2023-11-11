@@ -118,13 +118,11 @@ router.get('/mybookings', function(req, res) {
     
 /*DELETE/mycartBook en lien avec la collection CARTS pour supprimer un trajet*/
 
-router.delete('/mycartBook/:index', function(req,res) {
-    Cart.deleteOne({carts: req.params.index})
+router.delete('/mycartBook/:id', function(req,res) {
+    Cart.deleteOne({_id:req.params.id})
       .then(deletedCart => {
         if(deletedCart.deletedCount > 0){
-          Cart.find().then(data =>{
-            res.json({result:true, cart:data})
-          });
+            res.json({result:true, message:'Cart deleted'});
         } else {
             res.json({result:false, message: 'Pb DELETE' })
         }
